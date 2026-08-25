@@ -42,24 +42,30 @@ runs under; the commands above are the equivalent for a manual `sbx run`.
 
 ## How authentication works
 
-The first sandbox runs Devin's manual browser login. The proxy stores the
-intermediate browser token, then recognizes the durable `windsurf_api_key` on
-Devin's authenticated user-status request. sbx lets the candidate reach Devin
-and stores it only after Devin accepts it. The launcher then replaces the key in
-the first sandbox's credential file with `devin-proxy-managed` before starting
-the agent. `sbx secret ls` shows the host credential as
-`(token handled by proxy)`.
+Secure reusable Devin authentication is not currently expressible by a kit.
+The manual login response contains only an intermediate token. A live route
+trace confirms that Devin next calls `GetUserStatus` directly; it does not call
+either of the PKCE exchange RPCs in the CLI binary. The durable
+`windsurf_api_key` is therefore first observable in that outbound request, not
+in a narrowly matched server-issued response that a declarative kit could
+capture and mask.
+
+The current implementation depends on host-runtime support that recognizes the
+durable key on the authenticated user-status request, stores it only after the
+server accepts the request, and then replaces the first sandbox's credential
+file value with `devin-proxy-managed`. The real key exists briefly in that first
+sandbox between Devin writing it and the launcher replacing it. `sbx secret ls`
+then shows the host credential as `(token handled by proxy)`.
 
 On later runs, sbx renders the same placeholder into the credential file before
 the agent starts. The proxy replaces it with the host-held durable key only on
 Devin egress, preserving the Bearer or Basic shape expected by each request and
-rewriting Devin's protobuf request metadata. No running sandbox retains the
-reusable secret after login completes.
+rewriting Devin's protobuf request metadata.
 
-`passthrough: true` is required for the initial exchange: Devin must spend the
-real intermediate token to mint the durable key. That exception does not apply
-to the durable key, which remains in the host credential store after the first
-sandbox is removed.
+`passthrough: true` is required because Devin needs the real intermediate token
+to complete login; replacing it with a sentinel makes login fail before the
+durable credential is established. The intermediate token is distinct from the
+durable key retained in the host credential store.
 
 ## Permission mode and workspace trust
 

@@ -63,14 +63,18 @@ credentials:
     #     ['token']; the PkceAuthorizationCodeResponse struct in the binary
     #     belongs to a different exchange).
     #   * the same endpoint with accessToken=token — captures cleanly, but
-    #     `token` is an intermediate the CLI immediately spends on a second
-    #     call to mint the account's primary API key. Seeding it yields
-    #     "Failed to load team settings: ... invalid api key".
+    #     `token` is an intermediate needed to complete login, not the durable
+    #     key. Seeding it yields "Failed to load team settings: ... invalid api
+    #     key".
     #   * server.codeium.com/exa.seat_management_pb.SeatManagementService/
     #     GetCliTeamSettings — the response contains settings, not the key.
     #
-    # After OAuth, the CLI presents the durable key on its authenticated
-    # service requests. For one minute, the engine recognizes the Devin key
+    # A live route trace after /auth/cli/token contains GetUserStatus directly;
+    # neither ExchangeDevinCLIPKCECode nor ExchangePKCEAuthorizationCode is
+    # called. The durable key is therefore first observable on an outbound
+    # authenticated request, not in a narrowly matched server-issued response.
+    # Secure reusable Devin authentication is not currently expressible by a
+    # kit alone. The host runtime's one-minute handoff recognizes the Devin key
     # shape, lets that candidate reach a Devin-owned host, and stores it as the
     # primary API key only after the host accepts it with a successful response.
     #
@@ -114,13 +118,12 @@ credentials:
       responseFields:
         accessToken: token
         refreshToken: token
-      # No `sentinels:`. Devin must receive the real intermediate token so it
-      # can complete the exchange that mints the durable key.
+      # No `sentinels:`. Devin must receive the real intermediate token to
+      # complete login and establish the durable key.
       #
-      # Masking cannot work here: the token is immediately embedded in a
-      # subsequent Connect request that mints the account's primary API key.
-      # OAuth header substitution cannot replace a sentinel inside that
-      # protobuf payload, so login fails with "failed to get primary API key
+      # Masking cannot work here: Devin consumes the token internally while
+      # completing login. OAuth header substitution cannot replace a sentinel
+      # in that processing, so login fails with "failed to get primary API key
       # ... Invalid token" unless the real intermediate token passes through.
       #
       # The credential-file hook renders a proxy-managed placeholder whenever
