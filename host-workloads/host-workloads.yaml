@@ -1,0 +1,24 @@
+# syntax=docker/sandbox-kit:3
+# Docker Sandboxes kit that lets the agent run approved commands natively on
+# the Windows host. Usage and requirements: see README.md in this directory.
+schemaVersion: "3"
+kind: mixin
+displayName: Windows host workloads
+description: Lets the agent run approved commands natively on the Windows host, in a container limited to the workspace and the sandbox's network policy.
+sourceUrl: https://github.com/docker/sbx-kits-contrib/tree/v3/host-workloads
+licenses: [Apache-2.0]
+
+version: "0.1.0"
+provides: ["host-workloads"]
+
+capabilities:
+  # Grants this sandbox host runs. sbx serves them only while the host's
+  # feature.host-workloads setting is on, and the user approves every run;
+  # the grant cannot waive that approval.
+  - type: com.docker.sandbox/api@1
+    config:
+      operation: host-workloads.run
+
+  - type: com.docker.sandbox/agent-context@1
+    config:
+      contentFile: ./host-workloads-context.md

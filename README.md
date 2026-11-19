@@ -47,7 +47,7 @@ There are two kinds:
 | `workload` | The whole environment: the image the sandbox boots from, including the agent. Replaces v2's `kind: sandbox`. | A full root filesystem. A workload **must** have a recipe. |
 | `mixin` | A delta layered onto a workload: extra tools, credentials, hooks, egress. | An overlay (`FROM scratch`), or no recipe at all for a declaration-only kit. |
 
-This repo ships **33 workloads and 76 mixins**. Every workload except `openhands-canvas` and `shell` has a `-mixin` sibling declaring the same capabilities in overlay form, so an agent can either *be* the sandbox or be layered onto one; the remaining 45 mixins are standalone tools and integrations. See the [Kit index](#kit-index).
+This repo ships **33 workloads and 77 mixins**. Every workload except `openhands-canvas` and `shell` has a `-mixin` sibling declaring the same capabilities in overlay form, so an agent can either *be* the sandbox or be layered onto one; the remaining 46 mixins are standalone tools and integrations. See the [Kit index](#kit-index).
 
 ## Anatomy of a kit
 
@@ -431,6 +431,7 @@ Buildable kits are listed by `scripts/discover-kits.sh`. Entries marked DHI cata
 | [`gitlab`](./gitlab) | `deb/dpkg` | The GitLab CLI (`glab`) with proxy-injected token auth |
 | [`gitlab-ssh`](./gitlab-ssh) | `deb/openssh-client` | GitLab SSH host keys in `known_hosts` |
 | [`goose`](./goose) | — | goose, the open-source AI agent from Block, with proxy-managed provider credentials and a ChatGPT login |
+| [`host-workloads`](./host-workloads) | — | Approved commands run natively on the Windows host with `sbx-host` |
 | [`kernel`](./kernel) | — | Cloud-hosted Chromium with stealth, managed auth and session replay |
 | [`lighthouse`](./lighthouse) | — | The Lighthouse CLI with headless Chromium, for auditing pages served in-sandbox |
 | [`mise`](https://hub.docker.com/r/sbx/mise) (DHI catalog) | See Hub usage | mise tool management with shell activation |

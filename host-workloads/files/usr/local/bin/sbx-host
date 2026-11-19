@@ -1,0 +1,10 @@
+#!/bin/sh
+# sbx-host runs a command natively on this sandbox's Windows host. The client
+# comes from the sandbox's daemon, so it always speaks the daemon's protocol.
+set -eu
+gateway=${SBX_GATEWAY_URL:-http://gateway.docker.internal:3128}
+if ! client=$(curl -fsS --noproxy '*' "$gateway/_sbx/host/client" 2>/dev/null); then
+	echo "sbx-host: this sandbox's daemon does not serve host commands; they need Docker Sandboxes on Windows x64" >&2
+	exit 125
+fi
+exec sh -c "$client" sbx-host "$@"
