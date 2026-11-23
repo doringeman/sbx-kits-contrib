@@ -60,8 +60,11 @@ Then, in the sandbox:
 
 ```console
 sbx-host dotnet --info
-sbx-host -C src powershell -File build.ps1
+sbx-host -C src powershell -NonInteractive -File build.ps1
+sbx-host --timeout 10m dotnet test
 ```
+
+`sbx-host --help` lists the options and exit statuses.
 
 ## What the kit declares
 
@@ -79,8 +82,9 @@ sbx-host -C src powershell -File build.ps1
 The overlay is one shell script. It fetches the `sbx-host` client from the
 sandbox's gateway at each run and executes it, so the client always speaks the
 protocol of the daemon it talks to, and the kit needs no update when that
-protocol changes. Where the daemon does not serve host runs, the launcher exits
-125 and says so.
+protocol changes. Where the daemon does not serve the client, the launcher says
+so and exits 126, as the client does when host commands are not available; when
+it cannot reach the gateway, it exits 125.
 
 The kit declares no network policy: the launcher reaches only the sandbox's own
 gateway, and host runs reach the network through the sandbox's existing policy.

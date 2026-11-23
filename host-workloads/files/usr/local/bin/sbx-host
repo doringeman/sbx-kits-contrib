@@ -1,10 +1,22 @@
 #!/bin/sh
 # sbx-host runs a command natively on this sandbox's Windows host. The client
 # comes from the sandbox's daemon, so it always speaks the daemon's protocol.
+# A failed fetch exits as the client would: 126 when host commands are not
+# available, 125 when sbx-host cannot reach the gateway.
 set -eu
 gateway=${SBX_GATEWAY_URL:-http://gateway.docker.internal:3128}
-if ! client=$(curl -fsS --noproxy '*' "$gateway/_sbx/host/client" 2>/dev/null); then
+status=0
+# -q, first: the user's .curlrc must not change how the client is fetched.
+client=$(curl -q -fsS --noproxy '*' "$gateway/_sbx/host/client" 2>/dev/null) || status=$?
+case $status in
+0) ;;
+22)
 	echo "sbx-host: this sandbox's daemon does not serve host commands; they need Docker Sandboxes on Windows x64" >&2
+	exit 126
+	;;
+*)
+	echo "sbx-host: cannot reach this sandbox's gateway at $gateway" >&2
 	exit 125
-fi
+	;;
+esac
 exec sh -c "$client" sbx-host "$@"
