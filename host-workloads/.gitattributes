@@ -1,0 +1,3 @@
+# The launcher has no .sh extension; keep it LF on Windows checkouts too, or
+# its #!/bin/sh line ends in a carriage return and the sandbox cannot run it.
+files/** text eol=lf
