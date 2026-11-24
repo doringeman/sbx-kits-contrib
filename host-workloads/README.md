@@ -14,6 +14,25 @@ Each run is a native container that can write only the workspace and a private
 host home, and reaches the network only through the sandbox's network policy.
 The user approves every run, or every run of the sandbox at once.
 
+## What a run can do
+
+- Write the workspace and a private host home, kept between runs, and nothing
+  else.
+- Read what Windows lets any app container read, such as system and program
+  files, and the host's toolchains: the folders on the host's PATH, those named
+  by toolchain variables such as `JAVA_HOME`, `GOROOT`, `DOTNET_ROOT` or
+  `NVM_HOME`, and rustup's home. Every file inside such a folder is readable.
+  Drive roots, whole user profiles, sbx's own folders and known credential
+  locations are never granted, and nothing else of the user's is readable
+  unless a PATH entry points there.
+- List the names and read the attributes of files and folders anywhere on the
+  host's fixed drives, where the host's Windows supports it, without reading
+  their contents. Node, npm and Go need this to resolve paths.
+- Reach the network only through the sandbox's network policy.
+- Use the user's desktop, including the clipboard.
+
+The approval prompt says the same before each run.
+
 ## Requirements
 
 - Docker Sandboxes on Windows x64, with host workloads available, using the

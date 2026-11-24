@@ -14,7 +14,9 @@ The user approves each run, or every run of this sandbox at once until the sandb
 
 What a run can do:
 
-- It writes only the workspace and a private home on the host, which is kept between runs. It reads what Windows lets any app container read, such as system and program files, but not the user's documents.
+- It writes only the workspace and a private home on the host, which is kept between runs.
+- It reads what Windows lets any app container read, such as system and program files, and the toolchains the host has: the folders on its PATH, those in toolchain variables such as `JAVA_HOME`, `GOROOT` or `NVM_HOME`, and rustup's home. It reads nothing else of the user's, such as their documents, unless a PATH entry points there.
+- Where the host supports it, it can list the names and read the attributes of files and folders anywhere on the host's fixed drives, but not read their contents.
 - It reaches the network only through this sandbox's network policy.
 - It may use the user's desktop, including the clipboard.
 
